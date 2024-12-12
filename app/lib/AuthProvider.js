@@ -1,3 +1,7 @@
+'use client';
+
+import { createContext, useContext, useState, useEffect } from 'react';
+
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
@@ -5,11 +9,7 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // const unsubscribe = onAuthStateChanged(auth, user => {
-    //   setUser(user);
-    //   setLoading(false);
-    // });
-    // return () => unsubscribe();
+    // Logika dla onAuthStateChanged lub inna obsługa użytkownika
   }, []);
 
   return (

@@ -1,7 +1,9 @@
+'use client';
 import Link from 'next/link';
+import { useAuth } from '../app/lib/AuthProvider';
 
 function SideBar({ children }) {
-  const { user } = useContext(AuthProvider);
+  const { user } = useAuth();
   return (
     <>
       <div className="drawer drawer-open">
