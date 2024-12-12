@@ -26,6 +26,9 @@ function SideBar({ children }) {
               <Link href="/user/logout">Logout</Link>
             </li>
             <li>
+              <Link href="/user/register">Register</Link>
+            </li>
+            <li>
               <Link href="/user/profile">{user}</Link>
             </li>
           </ul>
