@@ -28,8 +28,11 @@ function SideBar({ children }) {
             <li>
               <Link href="/user/register">Register</Link>
             </li>
-            <li>
+            {/* <li>
               <Link href="/user/profile">{user}</Link>
+            </li> */}
+            <li>
+              <Link href="/user/profile">User</Link>
             </li>
           </ul>
         </div>
