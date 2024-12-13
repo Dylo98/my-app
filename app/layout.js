@@ -7,12 +7,12 @@ import { AuthProvider } from './lib/AuthProvider';
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={` bg-white dark:bg-gray-900`}>
+      <body className={` bg-white dark:bg-gray-900 flex flex-col min-h-screen`}>
         <AuthProvider>
-          <SideBar>
-            {children}
-            <Footer />
-          </SideBar>
+          <div className="flex flex-1">
+            <SideBar>{children}</SideBar>
+          </div>
+          <Footer />
         </AuthProvider>
       </body>
     </html>
