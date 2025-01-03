@@ -1,7 +1,18 @@
 'use client';
+import { useAuth } from '@/app/lib/firebase/AuthContext';
+import { useRouter } from 'next/navigation';
+
 function LogoutPage() {
-  const handleLogout = () => {
-    console.log('Logout button clicked');
+  const { logout } = useAuth();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      await logout(); // Wywołanie funkcji wylogowania
+      router.replace('/'); // Przekierowanie na stronę główną
+    } catch (error) {
+      console.error('Błąd podczas wylogowywania:', error);
+    }
   };
 
   return (

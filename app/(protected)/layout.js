@@ -1,19 +1,15 @@
 'use client';
-import { useAuth } from '@/app/lib/AuthProvider';
-import { useLayoutEffect } from 'react';
-import { redirect } from 'next/navigation';
-import { usePathname } from 'next/navigation';
+import { useAuth } from '@/app/lib/firebase/AuthContext';
 
-function Protected({ children }) {
+function Profile() {
   const { user } = useAuth();
-  const returnUrl = usePathname();
-
-  useLayoutEffect(() => {
-    // if (!user) {
-    //   redirect(`/user/login?returnUrl=${returnUrl}`);
-    // }
-  }, []);
-  return <>{children}</>;
+  return (
+    <>
+      <h1>Profile</h1>
+      <p>{user?.username}</p>
+      <p>{user?.email}</p>
+    </>
+  );
 }
 
-export default Protected;
+export default Profile;

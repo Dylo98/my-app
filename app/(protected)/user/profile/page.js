@@ -1,68 +1,130 @@
-function ProfileForm() {
+'use client';
+import { useAuth } from '@/app/lib/firebase/AuthContext';
+import { updateProfile } from 'firebase/auth';
+import { useState, useEffect } from 'react';
+
+function ProfilePage() {
+  const { user, loading } = useAuth();
+  const [username, setUsername] = useState('');
+  const [photoURL, setPhotoURL] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+
+  useEffect(() => {
+    console.log('User data in ProfilePage:', user); // Debugowanie danych użytkownika
+    if (user && !loading) {
+      setUsername(user.displayName || '');
+      setPhotoURL(user.photoURL || '');
+    }
+  }, [user, loading]);
+
+  const handleSave = async e => {
+    e.preventDefault();
+
+    try {
+      if (!user) throw new Error('Brak użytkownika!');
+      await updateProfile(auth.currentUser, {
+        displayName: username,
+        photoURL: photoURL,
+      });
+      setSuccessMessage('Profil został zaktualizowany!');
+      setErrorMessage('');
+    } catch (error) {
+      console.error('Błąd podczas aktualizacji profilu:', error);
+      setErrorMessage('Nie udało się zaktualizować profilu.');
+      setSuccessMessage('');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
+          Ładowanie danych użytkownika...
+        </h1>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
+          Nie jesteś zalogowany. Przejdź do logowania.
+        </h1>
+      </div>
+    );
+  }
+
   return (
-    <section className="bg-white dark:bg-gray-900 h-screen flex items-center justify-center">
-      <div className="lg:grid lg:min-h-screen lg:grid-cols-12">
-        <main className="flex items-center justify-center px-8 py-8 sm:px-12 lg:col-span-7 lg:px-16 lg:py-12 xl:col-span-6">
-          <div className="max-w-xl lg:max-w-3xl w-full">
-            <h1 className="mt-6 text-2xl font-bold text-gray-900 sm:text-3xl md:text-4xl dark:text-white">
-              Profile
-            </h1>
+    <section className="bg-gray-100 dark:bg-gray-900 h-screen flex items-center justify-center">
+      <div className="max-w-lg w-full bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg">
+        <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-6 text-center">
+          Twój Profil
+        </h1>
 
-            <form action="#" className="mt-8 grid grid-cols-6 gap-6">
-              <div className="col-span-6">
-                <label
-                  htmlFor="Username"
-                  className="block text-sm font-medium text-gray-700 dark:text-gray-200">
-                  Username
-                </label>
-                <input
-                  type="text"
-                  id="Username"
-                  name="username"
-                  className="mt-1 w-full rounded-md border-gray-200 bg-white text-lg text-gray-700 shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 py-3 px-4"
-                />
-              </div>
+        {successMessage && (
+          <div className="mb-4 text-green-500 text-sm">{successMessage}</div>
+        )}
+        {errorMessage && (
+          <div className="mb-4 text-red-500 text-sm">{errorMessage}</div>
+        )}
 
-              <div className="col-span-6">
-                <label
-                  htmlFor="PhotoURL"
-                  className="block text-sm font-medium text-gray-700 dark:text-gray-200">
-                  Profile Picture URL
-                </label>
-                <input
-                  type="url"
-                  id="PhotoURL"
-                  name="photoURL"
-                  className="mt-1 w-full rounded-md border-gray-200 bg-white text-lg text-gray-700 shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 py-3 px-4"
-                />
-              </div>
-
-              <div className="col-span-6">
-                <label
-                  htmlFor="Email"
-                  className="block text-sm font-medium text-gray-700 dark:text-gray-200">
-                  Email (Read-only)
-                </label>
-                <input
-                  type="email"
-                  id="Email"
-                  name="email"
-                  readOnly
-                  className="mt-1 w-full rounded-md border-gray-200 bg-white text-lg text-gray-700 shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 py-3 px-4"
-                />
-              </div>
-
-              <div className="col-span-6">
-                <button className="inline-block rounded-md bg-blue-600 px-12 py-3 text-sm font-medium text-white transition hover:bg-transparent hover:text-blue-600">
-                  Save Changes
-                </button>
-              </div>
-            </form>
+        <form onSubmit={handleSave} className="space-y-4">
+          <div>
+            <label
+              htmlFor="username"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-200">
+              Nazwa użytkownika
+            </label>
+            <input
+              type="text"
+              id="username"
+              value={username}
+              onChange={e => setUsername(e.target.value)}
+              className="w-full mt-1 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 p-3 shadow-sm"
+            />
           </div>
-        </main>
+
+          <div>
+            <label
+              htmlFor="photoURL"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-200">
+              Zdjęcie profilowe (URL)
+            </label>
+            <input
+              type="url"
+              id="photoURL"
+              value={photoURL}
+              onChange={e => setPhotoURL(e.target.value)}
+              className="w-full mt-1 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 p-3 shadow-sm"
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-200">
+              Email (Nieaktywny)
+            </label>
+            <input
+              type="email"
+              id="email"
+              value={user.email}
+              disabled
+              className="w-full mt-1 rounded-lg border-gray-300 bg-gray-200 dark:bg-gray-700 dark:text-gray-400 p-3 shadow-sm cursor-not-allowed"
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="w-full mt-4 rounded-lg bg-blue-500 px-5 py-3 text-sm font-medium text-white shadow hover:bg-blue-600">
+            Zapisz zmiany
+          </button>
+        </form>
       </div>
     </section>
   );
 }
 
-export default ProfileForm;
+export default ProfilePage;
