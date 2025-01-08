@@ -1,15 +1,14 @@
 'use client';
 import { useAuth } from '@/app/lib/firebase/AuthContext';
 
-function Profile() {
+function ProfileLayout({ children }) {
   const { user } = useAuth();
+
   return (
-    <>
-      <h1>Profile</h1>
-      <p>{user?.username}</p>
-      <p>{user?.email}</p>
-    </>
+    <div>
+      <div>{children}</div>
+    </div>
   );
 }
 
-export default Profile;
+export default ProfileLayout;

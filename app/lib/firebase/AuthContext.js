@@ -29,8 +29,8 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      await signOut(auth); // Wylogowanie z Firebase
-      setUser(null); // Ustawienie stanu użytkownika na null
+      await signOut(auth);
+      setUser(null);
     } catch (error) {
       console.error('Błąd podczas wylogowywania:', error);
     }

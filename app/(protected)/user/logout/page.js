@@ -8,8 +8,8 @@ function LogoutPage() {
 
   const handleLogout = async () => {
     try {
-      await logout(); // Wywołanie funkcji wylogowania
-      router.replace('/'); // Przekierowanie na stronę główną
+      await logout();
+      router.replace('/');
     } catch (error) {
       console.error('Błąd podczas wylogowywania:', error);
     }

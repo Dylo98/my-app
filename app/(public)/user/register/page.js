@@ -1,8 +1,12 @@
 'use client';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '@/firebase'; // Upewnij się, że ścieżka jest poprawna
+import {
+  createUserWithEmailAndPassword,
+  updateProfile,
+  signOut,
+} from 'firebase/auth';
+import { auth } from '@/firebase';
 import { useState } from 'react';
 
 function RegistrationForm() {
@@ -18,18 +22,28 @@ function RegistrationForm() {
 
   const onSubmit = async data => {
     try {
-      // Tworzenie użytkownika
-      await createUserWithEmailAndPassword(auth, data.email, data.password);
-      console.log('Zarejestrowano użytkownika');
-      router.push('/user/login'); // Przekierowanie na stronę logowania
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        data.email,
+        data.password
+      );
+
+      await updateProfile(userCredential.user, {
+        displayName: data.username,
+      });
+
+      console.log('Użytkownik zarejestrowany z nazwą:', data.username);
+
+      await signOut(auth);
+
+      router.push('/user/login');
     } catch (error) {
-      console.error('Błąd rejestracji:', error);
+      console.error('Błąd podczas rejestracji:', error);
       setRegistrationError('Rejestracja nie powiodła się. Spróbuj ponownie.');
     }
   };
 
-  // Sprawdzanie zgodności haseł
-  const password = watch('password', '');
+  const password = watch('password');
 
   return (
     <div className="mx-auto max-w-screen-xl px-4 py-16 sm:px-6 lg:px-8">
@@ -48,6 +62,33 @@ function RegistrationForm() {
             {registrationError}
           </div>
         )}
+
+        {/* Nazwa użytkownika */}
+        <div>
+          <label htmlFor="username" className="sr-only">
+            Nazwa użytkownika
+          </label>
+          <input
+            className="w-full rounded-lg border-gray-200 p-4 text-sm shadow-sm"
+            placeholder="Wprowadź nazwę użytkownika"
+            id="username"
+            type="text"
+            {...register('username', {
+              required: 'Nazwa użytkownika jest wymagana!',
+              maxLength: {
+                value: 20,
+                message: 'Nazwa użytkownika jest za długa!',
+              },
+            })}
+          />
+          {errors.username && (
+            <p className="text-red-500 text-xs italic">
+              {errors.username.message}
+            </p>
+          )}
+        </div>
+
+        {/* Email */}
         <div>
           <label htmlFor="email" className="sr-only">
             Email
@@ -73,6 +114,7 @@ function RegistrationForm() {
           )}
         </div>
 
+        {/* Hasło */}
         <div>
           <label htmlFor="password" className="sr-only">
             Hasło
@@ -97,6 +139,7 @@ function RegistrationForm() {
           )}
         </div>
 
+        {/* Potwierdź hasło */}
         <div>
           <label htmlFor="confirmPassword" className="sr-only">
             Potwierdź hasło
@@ -119,6 +162,7 @@ function RegistrationForm() {
           )}
         </div>
 
+        {/* Przycisk Zarejestruj */}
         <button
           type="submit"
           className="inline-block w-full rounded-lg bg-blue-500 px-5 py-3 text-sm font-medium text-white">
