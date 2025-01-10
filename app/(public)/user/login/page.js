@@ -29,12 +29,24 @@ function LoginForm() {
         data.password
       );
 
-      console.log('Użytkownik zalogowany:', userCredential.user);
+      const user = userCredential.user;
+
+      if (!user.emailVerified) {
+        await auth.signOut();
+        throw new Error(
+          'Twoje konto nie zostało zweryfikowane. Sprawdź swoją skrzynkę e-mail.'
+        );
+      }
+
+      console.log('Użytkownik zalogowany:', user);
 
       router.push('/user/profile');
     } catch (error) {
       console.error('Błąd logowania:', error);
-      if (error.code === 'auth/user-not-found') {
+
+      if (error.message.includes('nie zostało zweryfikowane')) {
+        setLoginError(error.message);
+      } else if (error.code === 'auth/user-not-found') {
         setLoginError('Użytkownik o podanym adresie e-mail nie istnieje.');
       } else if (error.code === 'auth/wrong-password') {
         setLoginError('Podane hasło jest nieprawidłowe.');
@@ -63,6 +75,7 @@ function LoginForm() {
         {loginError && (
           <div className="text-red-500 text-sm font-medium">{loginError}</div>
         )}
+
         <div>
           <label htmlFor="email" className="sr-only">
             Email

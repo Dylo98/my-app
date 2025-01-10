@@ -19,8 +19,6 @@ function ProfilePage() {
   }, [user, loading]);
 
   const handleSave = async e => {
-    e.preventDefault();
-
     try {
       const currentUser = auth.currentUser;
 

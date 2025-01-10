@@ -3,6 +3,7 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import {
   createUserWithEmailAndPassword,
+  sendEmailVerification,
   updateProfile,
   signOut,
 } from 'firebase/auth';
@@ -19,6 +20,7 @@ function RegistrationForm() {
   } = useForm();
 
   const [registrationError, setRegistrationError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   const onSubmit = async data => {
     try {
@@ -28,17 +30,26 @@ function RegistrationForm() {
         data.password
       );
 
-      await updateProfile(userCredential.user, {
+      const user = userCredential.user;
+
+      await updateProfile(user, {
         displayName: data.username,
       });
 
-      console.log('Użytkownik zarejestrowany z nazwą:', data.username);
+      console.log('Nazwa użytkownika ustawiona:', data.username);
+
+      await sendEmailVerification(user);
+      console.log('E-mail weryfikacyjny został wysłany.');
+
+      setSuccessMessage(
+        'Zarejestrowano konto! Sprawdź swoją skrzynkę e-mail, aby aktywować konto.'
+      );
 
       await signOut(auth);
 
       router.push('/user/login');
     } catch (error) {
-      console.error('Błąd podczas rejestracji:', error);
+      console.error('Błąd rejestracji:', error);
       setRegistrationError('Rejestracja nie powiodła się. Spróbuj ponownie.');
     }
   };
@@ -62,8 +73,12 @@ function RegistrationForm() {
             {registrationError}
           </div>
         )}
+        {successMessage && (
+          <div className="text-green-500 text-sm font-medium">
+            {successMessage}
+          </div>
+        )}
 
-        {/* Nazwa użytkownika */}
         <div>
           <label htmlFor="username" className="sr-only">
             Nazwa użytkownika
@@ -88,7 +103,6 @@ function RegistrationForm() {
           )}
         </div>
 
-        {/* Email */}
         <div>
           <label htmlFor="email" className="sr-only">
             Email
@@ -139,7 +153,6 @@ function RegistrationForm() {
           )}
         </div>
 
-        {/* Potwierdź hasło */}
         <div>
           <label htmlFor="confirmPassword" className="sr-only">
             Potwierdź hasło
@@ -162,7 +175,6 @@ function RegistrationForm() {
           )}
         </div>
 
-        {/* Przycisk Zarejestruj */}
         <button
           type="submit"
           className="inline-block w-full rounded-lg bg-blue-500 px-5 py-3 text-sm font-medium text-white">
