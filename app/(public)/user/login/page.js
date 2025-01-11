@@ -1,9 +1,11 @@
 'use client';
+
 import { useRouter } from 'next/navigation';
 import {
   setPersistence,
   signInWithEmailAndPassword,
   browserSessionPersistence,
+  signOut,
 } from 'firebase/auth';
 import { useForm } from 'react-hook-form';
 import { auth } from '@/firebase';
@@ -32,10 +34,9 @@ function LoginForm() {
       const user = userCredential.user;
 
       if (!user.emailVerified) {
-        await auth.signOut();
-        throw new Error(
-          'Twoje konto nie zostało zweryfikowane. Sprawdź swoją skrzynkę e-mail.'
-        );
+        await signOut(auth);
+        router.push('/user/verify');
+        return;
       }
 
       console.log('Użytkownik zalogowany:', user);
@@ -44,9 +45,7 @@ function LoginForm() {
     } catch (error) {
       console.error('Błąd logowania:', error);
 
-      if (error.message.includes('nie zostało zweryfikowane')) {
-        setLoginError(error.message);
-      } else if (error.code === 'auth/user-not-found') {
+      if (error.code === 'auth/user-not-found') {
         setLoginError('Użytkownik o podanym adresie e-mail nie istnieje.');
       } else if (error.code === 'auth/wrong-password') {
         setLoginError('Podane hasło jest nieprawidłowe.');
