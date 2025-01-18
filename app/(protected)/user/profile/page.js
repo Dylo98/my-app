@@ -1,33 +1,81 @@
 'use client';
+
 import { useAuth } from '@/app/lib/firebase/AuthContext';
 import { updateProfile } from 'firebase/auth';
 import { useState, useEffect } from 'react';
-import { auth } from '@/firebase';
+import { useForm } from 'react-hook-form';
+import { auth, db } from '@/firebase';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 function ProfilePage() {
   const { user, loading } = useAuth();
-  const [username, setUsername] = useState('');
-  const [photoURL, setPhotoURL] = useState('');
+  const {
+    register,
+    setValue,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
+      email: user?.email || '',
+      displayName: user?.displayName || '',
+      photoURL: user?.photoURL || '',
+      city: '',
+      street: '',
+      zipCode: '',
+    },
+  });
+
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [isLoadingData, setIsLoadingData] = useState(true);
 
   useEffect(() => {
-    if (user && !loading) {
-      setUsername(user.displayName || '');
-      setPhotoURL(user.photoURL || '');
-    }
-  }, [user, loading]);
+    const fetchUserData = async () => {
+      try {
+        if (user?.uid) {
+          const snapshot = await getDoc(doc(db, 'users', user.uid));
+          if (snapshot.exists()) {
+            const address = snapshot.data()?.address || {};
+            setValue('city', address.city || '');
+            setValue('street', address.street || '');
+            setValue('zipCode', address.zipCode || '');
+          }
+        }
+        setIsLoadingData(false);
+      } catch (error) {
+        console.error('Błąd podczas pobierania danych użytkownika:', error);
+        setErrorMessage('Nie udało się pobrać danych użytkownika.');
+        setIsLoadingData(false);
+      }
+    };
 
-  const handleSave = async e => {
+    fetchUserData();
+  }, [user, setValue]);
+
+  const handleSave = async data => {
     try {
       const currentUser = auth.currentUser;
 
       if (!currentUser) throw new Error('Brak zalogowanego użytkownika.');
 
+      // Aktualizacja profilu użytkownika w Authentication
       await updateProfile(currentUser, {
-        displayName: username,
-        photoURL: photoURL,
+        displayName: data.displayName,
+        photoURL: data.photoURL,
       });
+
+      await setDoc(
+        doc(db, 'users', currentUser.uid),
+        {
+          address: {
+            city: data.city,
+            street: data.street,
+            zipCode: data.zipCode,
+          },
+        },
+        { merge: true }
+      );
 
       setSuccessMessage('Profil został zaktualizowany!');
       setErrorMessage('');
@@ -38,7 +86,7 @@ function ProfilePage() {
     }
   };
 
-  if (loading) {
+  if (loading || isLoadingData) {
     return (
       <div className="h-screen flex items-center justify-center">
         <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
@@ -74,7 +122,7 @@ function ProfilePage() {
             <div className="mb-4 text-red-500 text-sm">{errorMessage}</div>
           )}
 
-          <form onSubmit={handleSave} className="space-y-4">
+          <form onSubmit={handleSubmit(handleSave)} className="space-y-4">
             <div>
               <label
                 htmlFor="email"
@@ -84,7 +132,7 @@ function ProfilePage() {
               <input
                 type="email"
                 id="email"
-                value={user.email}
+                {...register('email')}
                 readOnly
                 className="w-full mt-1 rounded-lg border-gray-300 bg-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-400 p-3 shadow-sm cursor-not-allowed"
               />
@@ -92,15 +140,14 @@ function ProfilePage() {
 
             <div>
               <label
-                htmlFor="username"
+                htmlFor="displayName"
                 className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                 Nazwa użytkownika
               </label>
               <input
                 type="text"
-                id="username"
-                value={username}
-                onChange={e => setUsername(e.target.value)}
+                id="displayName"
+                {...register('displayName')}
                 className="w-full mt-1 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 p-3 shadow-sm"
               />
             </div>
@@ -114,8 +161,49 @@ function ProfilePage() {
               <input
                 type="url"
                 id="photoURL"
-                value={photoURL}
-                onChange={e => setPhotoURL(e.target.value)}
+                {...register('photoURL')}
+                className="w-full mt-1 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 p-3 shadow-sm"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="street"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-200">
+                Ulica
+              </label>
+              <input
+                type="text"
+                id="street"
+                {...register('street')}
+                className="w-full mt-1 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 p-3 shadow-sm"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="city"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-200">
+                Miasto
+              </label>
+              <input
+                type="text"
+                id="city"
+                {...register('city')}
+                className="w-full mt-1 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 p-3 shadow-sm"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="zipCode"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-200">
+                Kod pocztowy
+              </label>
+              <input
+                type="text"
+                id="zipCode"
+                {...register('zipCode')}
                 className="w-full mt-1 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 p-3 shadow-sm"
               />
             </div>
