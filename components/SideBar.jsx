@@ -30,14 +30,17 @@ function SideBar({ children }) {
             {user ? (
               <>
                 <li>
-                  <Link href="/user/profile">Profile</Link>
+                  <Link href="/user/profile">Twój profil</Link>
                 </li>
                 <li>
-                  <Link href="/user/books">Books</Link>
+                  <Link href="/user/books">Książki</Link>
+                </li>
+                <li>
+                  <Link href="/user/booksBase">Baza książek</Link>
                 </li>
                 <li>
                   <button onClick={handleLogout} className="text-red-600">
-                    Logout
+                    Wyloguj
                   </button>
                 </li>
               </>

@@ -15,16 +15,7 @@ function ProfilePage() {
     handleSubmit,
     watch,
     formState: { errors },
-  } = useForm({
-    defaultValues: {
-      email: user?.email || '',
-      displayName: user?.displayName || '',
-      photoURL: user?.photoURL || '',
-      city: '',
-      street: '',
-      zipCode: '',
-    },
-  });
+  } = useForm();
 
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
@@ -49,8 +40,12 @@ function ProfilePage() {
         setIsLoadingData(false);
       }
     };
-
-    fetchUserData();
+    if (user) {
+      setValue('email', user.email || '');
+      setValue('displayName', user.displayName || '');
+      setValue('photoURL', user.photoURL || '');
+      fetchUserData();
+    }
   }, [user, setValue]);
 
   const handleSave = async data => {
@@ -59,7 +54,6 @@ function ProfilePage() {
 
       if (!currentUser) throw new Error('Brak zalogowanego użytkownika.');
 
-      // Aktualizacja profilu użytkownika w Authentication
       await updateProfile(currentUser, {
         displayName: data.displayName,
         photoURL: data.photoURL,
@@ -79,6 +73,10 @@ function ProfilePage() {
 
       setSuccessMessage('Profil został zaktualizowany!');
       setErrorMessage('');
+
+      setTimeout(() => {
+        window.location.reload();
+      }, 300);
     } catch (error) {
       console.error('Błąd podczas aktualizacji profilu:', error);
       setErrorMessage('Nie udało się zaktualizować profilu.');
