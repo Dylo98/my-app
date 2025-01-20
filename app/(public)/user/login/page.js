@@ -9,17 +9,15 @@ import {
 } from 'firebase/auth';
 import { useForm } from 'react-hook-form';
 import { auth } from '@/firebase';
-import { useState } from 'react';
 
 function LoginForm() {
   const router = useRouter();
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors },
   } = useForm();
-
-  const [loginError, setLoginError] = useState('');
 
   const onSubmit = async data => {
     try {
@@ -44,17 +42,34 @@ function LoginForm() {
       router.push('/user/profile');
     } catch (error) {
       console.error('Błąd logowania:', error);
-
+      console.log('Kod błędu Firebase:', error.code);
       if (error.code === 'auth/user-not-found') {
-        setLoginError('Użytkownik o podanym adresie e-mail nie istnieje.');
+        setError('email', {
+          type: 'manual',
+          message: 'Użytkownik o podanym adresie e-mail nie istnieje.',
+        });
       } else if (error.code === 'auth/wrong-password') {
-        setLoginError('Podane hasło jest nieprawidłowe.');
+        setError('password', {
+          type: 'manual',
+          message: 'Podane hasło jest nieprawidłowe.',
+        });
+      } else if (error.code === 'auth/invalid-credential') {
+        setError('email', {
+          type: 'manual',
+          message:
+            'Nieprawidłowe dane logowania. Sprawdź adres e-mail i hasło.',
+        });
       } else if (error.code === 'auth/too-many-requests') {
-        setLoginError(
-          'Zbyt wiele nieudanych prób logowania. Spróbuj ponownie później.'
-        );
+        setError('email', {
+          type: 'manual',
+          message:
+            'Zbyt wiele nieudanych prób logowania. Spróbuj ponownie później.',
+        });
       } else {
-        setLoginError('Wystąpił błąd. Spróbuj ponownie.');
+        setError('email', {
+          type: 'manual',
+          message: 'Wystąpił nieznany błąd. Spróbuj ponownie.',
+        });
       }
     }
   };
@@ -71,16 +86,19 @@ function LoginForm() {
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="mx-auto mt-8 max-w-md space-y-4">
-        {loginError && (
-          <div className="text-red-500 text-sm font-medium">{loginError}</div>
-        )}
-
         <div>
           <label htmlFor="email" className="sr-only">
             Email
           </label>
+          {errors.email && (
+            <p className="text-red-500 text-xs italic mb-2">
+              {errors.email.message}
+            </p>
+          )}
           <input
-            className="w-full rounded-lg border-gray-200 p-4 text-sm shadow-sm"
+            className={`w-full rounded-lg border-gray-200 p-4 text-sm shadow-sm ${
+              errors.email ? 'border-red-500' : ''
+            }`}
             placeholder="Wprowadź email"
             id="email"
             type="email"
@@ -93,29 +111,26 @@ function LoginForm() {
               },
             })}
           />
-          {errors.email && (
-            <p className="text-red-500 text-xs italic">
-              {errors.email.message}
-            </p>
-          )}
         </div>
 
         <div>
           <label htmlFor="password" className="sr-only">
             Hasło
           </label>
+          {errors.password && (
+            <p className="text-red-500 text-xs italic mb-2">
+              {errors.password.message}
+            </p>
+          )}
           <input
-            className="w-full rounded-lg border-gray-200 p-4 text-sm shadow-sm"
+            className={`w-full rounded-lg border-gray-200 p-4 text-sm shadow-sm ${
+              errors.password ? 'border-red-500' : ''
+            }`}
             type="password"
             id="password"
             placeholder="Wprowadź hasło"
             {...register('password', { required: 'Hasło jest wymagane!' })}
           />
-          {errors.password && (
-            <p className="text-red-500 text-xs italic">
-              {errors.password.message}
-            </p>
-          )}
         </div>
 
         <button

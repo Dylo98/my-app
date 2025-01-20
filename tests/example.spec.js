@@ -1,19 +1,14 @@
-// @ts-check
-import { test, expect } from '@playwright/test';
+const { test, expect } = require('@playwright/test');
 
-test('has title', async ({ page }) => {
-  await page.goto('https://playwright.dev/');
+test('has link do login page', async ({ page }) => {
+  await page.goto('http://localhost:3000');
 
-  // Expect a title "to contain" a substring.
-  await expect(page).toHaveTitle(/Playwright/);
-});
+  // Symulacja kliknięcia na link z tekstem login, przejście do strony logowania
+  await page.click('text=login');
 
-test('get started link', async ({ page }) => {
-  await page.goto('https://playwright.dev/');
+  // Sprawdzenie, czy została otwarta strona ze ścieżką do formularza logowania
+  expect(page).toHaveURL('http://localhost:3000/user/login');
 
-  // Click the get started link.
-  await page.getByRole('link', { name: 'Get started' }).click();
-
-  // Expects page to have a heading with the name of Installation.
-  await expect(page.getByRole('heading', { name: 'Installation' })).toBeVisible();
+  // Sprawdzenie, czy na stronie logowania jest nagłówek z tekstem Login to App
+  await expect(page.locator('h1')).toContainText('Zaloguj się');
 });
