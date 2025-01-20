@@ -46,8 +46,9 @@ function RegistrationForm() {
       );
 
       await signOut(auth);
+      console.log('Użytkownik został wylogowany.');
 
-      router.push('/user/login');
+      await router.push('/user/login');
     } catch (error) {
       console.error('Błąd rejestracji:', error);
       setRegistrationError('Rejestracja nie powiodła się. Spróbuj ponownie.');
