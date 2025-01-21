@@ -119,10 +119,10 @@ function SideBar({ children }) {
               ) : (
                 <>
                   <li>
-                    <Link href="/user/login">Login</Link>
+                    <Link href="/user/login">Logowanie</Link>
                   </li>
                   <li>
-                    <Link href="/user/register">Register</Link>
+                    <Link href="/user/register">Rejestracja</Link>
                   </li>
                 </>
               )}
