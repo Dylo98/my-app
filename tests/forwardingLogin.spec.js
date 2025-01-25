@@ -4,10 +4,11 @@ test.describe('Rejestracja użytkownika', () => {
   test('Użytkownik po rejestracji jest przekierowany do formularza logowania', async ({
     page,
   }) => {
+    const uniqueEmail = `testuser${Date.now()}@example.com`;
     await page.goto('http://localhost:3000/user/register');
 
     await page.fill('input#username', 'TestUser');
-    await page.fill('input#email', 'testuser111@example.com');
+    await page.fill('input#email', uniqueEmail);
     await page.fill('input#password', 'password123');
     await page.fill('input#confirmPassword', 'password123');
 

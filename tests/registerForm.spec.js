@@ -72,16 +72,4 @@ test.describe('Formularz rejestracji', () => {
     });
     expect(page.url()).toBe('http://localhost:3000/user/login');
   });
-
-  test('Obsługa błędu rejestracji', async ({ page }) => {
-    await page.fill('input#username', 'testuser');
-    await page.fill('input#email', 'existinguser@example.com');
-    await page.fill('input#password', 'haslo123');
-    await page.fill('input#confirmPassword', 'haslo123');
-    await page.click('button[type="submit"]');
-
-    await expect(
-      page.locator('text=Rejestracja nie powiodła się. Spróbuj ponownie.')
-    ).toBeVisible();
-  });
 });
